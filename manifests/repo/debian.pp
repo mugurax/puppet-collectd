@@ -1,9 +1,11 @@
-class collectd::repo::debian {
 
-  contain ::apt
+
+class collectd::repo::debian {
 
   if $::collectd::ci_package_repo {
 
+    notify{"collectd::repo::debian->apt-sourceing":} ->
+    
     apt::source { 'collectd-ci':
       location => 'https://pkg.ci.collectd.org/deb/',
       repos    => "collectd-${$::collectd::ci_package_repo}",
@@ -11,7 +13,12 @@ class collectd::repo::debian {
         'id'     => 'F806817DC3F5EA417F9FA2963994D24FB8543576',
         'server' => 'pgp.mit.edu',
       },
-    }
+    } -> 
+    
+    notify{"collectd::repo::debian->apt updating->":} #->
+
+    #Exec['apt_update']
+
   } else {
     if $::operatingsystem == 'Debian' {
       warning('Youre trying to use the Ubuntu PPA on a Debian Server, which may cause errors')
@@ -24,8 +31,10 @@ class collectd::repo::debian {
           'id'     => '7543C08D555DC473B9270ACDAF7ECBB3476ACEB3',
           'server' => 'keyserver.ubuntu.com',
         },
-      }
+      }# -> Exec['apt_update']
     }
   }
+
+
 
 }

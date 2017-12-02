@@ -2,12 +2,12 @@
 class collectd::plugin::write_http (
   $ensure   = 'present',
   $interval = undef,
-  $urls     = {},
+  $nodes    = {}
 ) {
 
   include ::collectd
 
-  validate_hash($urls)
+  validate_hash($nodes)
 
   collectd::plugin { 'write_http':
     ensure   => $ensure,

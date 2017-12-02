@@ -36,24 +36,22 @@ class collectd (
 
   $collectd_version_real = pick($::collectd_version, $minimum_version)
 
-  class { '::collectd::install':
-    package_install_options => $package_install_options,
+
+  apt::source { 'collectd-ci':
+    location => 'http://pkg.ci.collectd.org/deb/',
+    repos    => "collectd-5.7",
+    key      => {
+      'id'     => 'F806817DC3F5EA417F9FA2963994D24FB8543576',
+      'server' => 'pgp.mit.edu',
+    },
   }
+  -> Exec['apt_update'] 
 
-  class { '::collectd::repo': }
+  -> package { 'collectd':
+    ensure => 'latest'
+  } 
 
-  class { '::collectd::config': }
+  -> class { '::collectd::config': }
+  ~> class { '::collectd::service': }
 
-  class { '::collectd::service': }
-
-  anchor { 'collectd::begin': }
-  anchor { 'collectd::end': }
-
-  Class['::collectd::repo'] ~>
-  Class['::collectd::install']
-
-  Anchor['collectd::begin'] ->
-  Class['collectd::install'] ->
-  Class['collectd::config'] ~>
-  Class['collectd::service']
 }
